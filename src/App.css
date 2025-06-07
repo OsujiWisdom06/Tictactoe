@@ -45,6 +45,10 @@ body.dark {
   .controls button:last-child, .controls.dark button:last-child {
     margin-top: 10px;
   }
+
+  .mode-selector {
+    flex-direction: column;
+  }
   
 }
 
@@ -165,13 +169,24 @@ body.dark {
 
 .mode-selector {
   margin-bottom: 15px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
 }
 
-.mode-selector.dark select{
+.mode-selector.dark select {
   background-color: #2c2c3e;
-  color:white;
+  color: white;
   border: none;
   outline: none;
+
+  
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .mode-selector select {
@@ -180,6 +195,19 @@ body.dark {
   font-size: 14px;
   border-radius: 4px;
   border: 1px solid #ccc;
+
+  
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-selector select:hover {
+  border-color: #4a90e2;
+}
+
+.mode-selector.dark select:hover {
+  border-color: #4a90e2;
+  background-color: #3c3c4e;
 }
 
 /* Dark mode toggle switch */

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { calculateWinner, getRandomMove } from "../utils/gameUtils";
+import { calculateWinner, getEasyMove, getMediumMove, getHardMove, getBossMove } from "../utils/gameUtils";
 
 export function useGameHook() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
@@ -8,6 +8,7 @@ export function useGameHook() {
   const [scores, setScores] = useState({ X: 0, O: 0 });
   const [mode, setMode] = useState(() => localStorage.getItem("ticTacToeMode") || "PvP");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ticTacToeDark") === "true");
+  const [difficulty, setDifficulty] = useState(() => localStorage.getItem("ticTacToeDifficulty") || "easy");
 
   const current = history[step];
   const winnerInfo = calculateWinner(current);
@@ -30,33 +31,41 @@ export function useGameHook() {
   }, [mode]);
 
   useEffect(() => {
+    localStorage.setItem("ticTacToeDifficulty", difficulty);
+  }, [difficulty]);
+
+  useEffect(() => {
     resetGame();
-  }, [mode]);
+  }, [mode, difficulty]);
 
   useEffect(() => {
     if (mode === "PvC" && !winner && !isDraw && !xIsNext) {
-      const timer = setTimeout(() => {
-        const move = getRandomMove(current);
+      const timer = setTimeout(async () => {
+        let move;
+        switch (difficulty) {
+          case "easy":
+            move = getEasyMove(current);
+            break;
+          case "medium":
+            move = getMediumMove(current);
+            break;
+          case "hard":
+            move = getHardMove(current);
+            break;
+          case "boss":
+            move = await getBossMove(current);
+            break;
+          default:
+            move = getEasyMove(current);
+        }
+        
         if (move !== null && move !== undefined) {
           handlePlay(move, true);
         }
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [step, xIsNext, mode, current, winner, isDraw]);
-
-  // you can remove this duplicate effect
-    useEffect(() => {
-      if (mode === 'PvC' && !xIsNext && !winner && !isDraw) {
-        const timer = setTimeout(() => {
-          const move = getRandomMove(current);
-          if (move !== null && move !== undefined) {
-            handlePlay(move, true);
-          }
-        }, 400);
-        return () => clearTimeout(timer);
-      }
-    }, [step]);
+  }, [step, xIsNext, mode, difficulty, current, winner, isDraw]);
 
   const handlePlay = (i, byAI = false) => {
     if (current[i] || winner || (mode === "PvC" && !xIsNext && !byAI)) return;
@@ -100,12 +109,14 @@ export function useGameHook() {
     xIsNext,
     scores,
     mode,
+    difficulty,
     darkMode,
     current,
     winner,
     winningLine,
     isDraw,
     setMode,
+    setDifficulty,
     setDarkMode,
     handlePlay,
     jumpTo,

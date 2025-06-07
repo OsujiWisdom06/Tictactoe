@@ -11,12 +11,14 @@ function App() {
     xIsNext,
     scores,
     mode,
+    difficulty,
     darkMode,
     current,
     winner,
     winningLine,
     isDraw,
     setMode,
+    setDifficulty,
     setDarkMode,
     handlePlay,
     jumpTo,
@@ -45,6 +47,17 @@ function App() {
             <option value="PvC">🤖 Player vs Computer</option>
           </select>
         </label>
+        {mode === "PvC" && (
+          <label style={{ marginLeft: "15px" }}>
+            Difficulty:
+            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+              <option value="easy">😊 Easy</option>
+              <option value="medium">😐 Medium</option>
+              <option value="hard">😈 Hard</option>
+              <option value="boss">👑 Boss Level(AI)</option>
+            </select>
+          </label>
+        )}
       </div>
 
       <div className="status">{status}</div>
@@ -61,7 +74,7 @@ function App() {
         </button>
         <button
           onClick={() => step > 0 && jumpTo(step - 1)}
-          disabled={step === 0}
+          disabled={step === 0 || winningLine !== null}
         >
           Undo
         </button>
