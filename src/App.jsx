@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import InstallPrompt from './components/InstallPrompt';
 
 function Square({ value, onClick, highlight }) {
   return (
@@ -157,6 +158,7 @@ function App() {
 
   return (
     <div className={`game ${darkMode ? 'dark' : ''}`}>
+       <InstallPrompt/>
       <div className="dark-toggle">
         <label className="switch">
           <input
