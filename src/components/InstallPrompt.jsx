@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+// Helper functions
 const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   return /iphone|ipad|ipod/.test(userAgent);
@@ -23,13 +24,16 @@ const InstallPrompt = () => {
       }, 2000);
     };
 
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
     if (isIos() && !isInStandaloneMode()) {
       setTimeout(() => {
         setShowIosPrompt(true);
+        setTimeout(() => {
+          setShowIosPrompt(false);
+        }, 6000);
       }, 2000);
     }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -77,45 +81,49 @@ const InstallPrompt = () => {
             fontWeight: 'bold',
             cursor: 'pointer',
             animation: 'pulse 1.5s infinite',
-            zIndex: 999
+            zIndex: 999,
           }}
         >
           Install App
         </button>
       )}
-
       {showIosPrompt && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          backgroundColor: '#fff3cd',
-          color: '#856404',
-          padding: '12px 20px',
-          border: '1px solid #ffeeba',
-          borderRadius: '5px',
-          maxWidth: '250px',
-          zIndex: 999
-        }}>
-          <strong>Install this app:</strong><br />
-          Tap the <strong>Share</strong> button, then choose<br />
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            padding: '12px 20px',
+            border: '1px solid #ffeeba',
+            borderRadius: '5px',
+            maxWidth: '250px',
+            zIndex: 999,
+          }}
+        >
+          <strong>Install this app:</strong>
+          <br />
+          Tap the <strong>Share</strong> button, then choose
+          <br />
           <strong>"Add to Home Screen"</strong>.
         </div>
       )}
-
       {showToast && (
-        <div style={{
-          position: 'fixed',
-          bottom: '80px',
-          right: '20px',
-          backgroundColor: '#4BB543',
-          color: '#fff',
-          padding: '12px 20px',
-          borderRadius: '5px',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-          animation: 'fadeInOut 4s ease-in-out'
-        }}>
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '80px',
+            right: '20px',
+            backgroundColor: '#4BB543',
+            color: '#fff',
+            padding: '12px 20px',
+            borderRadius: '5px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            zIndex: 1000,
+            animation: 'fadeInOut 4s ease-in-out',
+          }}
+        >
           Installed successfully! ✅
         </div>
       )}
