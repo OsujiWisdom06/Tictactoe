@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-// Helper functions
 const isIos = () => {
   const userAgent = window.navigator.userAgent.toLowerCase();
   return /iphone|ipad|ipod/.test(userAgent);
@@ -16,20 +15,18 @@ const InstallPrompt = () => {
   const [showIosPrompt, setShowIosPrompt] = useState(false);
 
   useEffect(() => {
-    // Handle Android install prompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setTimeout(() => {
         setShowPrompt(true);
-      }, 3000);
+      }, 2000);
     };
 
-    // Handle iOS prompt
     if (isIos() && !isInStandaloneMode()) {
       setTimeout(() => {
         setShowIosPrompt(true);
-      }, 3000);
+      }, 2000);
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -63,7 +60,6 @@ const InstallPrompt = () => {
 
   return (
     <div>
-      {/* Android Install Button */}
       {showPrompt && (
         <button
           onClick={handleInstallClick}
@@ -88,7 +84,6 @@ const InstallPrompt = () => {
         </button>
       )}
 
-      {/* iOS Install Instructions */}
       {showIosPrompt && (
         <div style={{
           position: 'fixed',
@@ -108,7 +103,6 @@ const InstallPrompt = () => {
         </div>
       )}
 
-      {/* Toast Message */}
       {showToast && (
         <div style={{
           position: 'fixed',
@@ -126,7 +120,6 @@ const InstallPrompt = () => {
         </div>
       )}
 
-      {/* Animations */}
       <style>
         {`
           @keyframes pulse {
