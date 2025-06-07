@@ -106,7 +106,7 @@ const InstallPrompt = () => {
           <br />
           Tap the <strong>Share</strong> button, then choose
           <br />
-          <strong>"Add to Home Screen"</strong>.
+          <strong>&quot;Add to Home Screen&quot;</strong>.
         </div>
       )}
       {showToast && (

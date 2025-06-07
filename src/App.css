@@ -15,6 +15,10 @@ body {
   height: 100vh;
 }
 
+body.dark {
+  background: linear-gradient(to right, #1e1e2f, #2c2c3e); /* Dark mode */
+}
+
 /* Game container */
 .game {
   background-color: #ffffff;
@@ -22,8 +26,30 @@ body {
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 350px;
+  /* width: 350px; */
   transition: background 0.3s, color 0.3s;
+}
+
+.game{
+  max-width: 600px;
+  margin: 0 auto;
+  
+}
+
+@media screen and (max-width: 467px) {
+  .game {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .controls button:last-child, .controls.dark button:last-child {
+    margin-top: 10px;
+  }
+
+  .mode-selector {
+    flex-direction: column;
+  }
+  
 }
 
 /* Dark mode */
@@ -114,13 +140,25 @@ body {
   transition: 0.3s ease;
 }
 
+.controls.dark button {
+  background-color: #132c45 !important;
+}
+
 .controls button:hover:not(:disabled) {
-  background-color: #357ab8;
+  background-color: #357ab8 !important;
+}
+
+.controls.dark button:hover:not(:disabled) {
+  background-color: #34495e !important;
 }
 
 .controls button:disabled {
   background-color: #b0c4de;
   cursor: not-allowed;
+}
+
+.controls.dark button:disabled {
+  background-color: #4b5565 !important;
 }
 
 /* Scoreboard */
@@ -131,6 +169,24 @@ body {
 
 .mode-selector {
   margin-bottom: 15px;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.mode-selector.dark select {
+  background-color: #2c2c3e;
+  color: white;
+  border: none;
+  outline: none;
+
+  
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .mode-selector select {
@@ -139,6 +195,19 @@ body {
   font-size: 14px;
   border-radius: 4px;
   border: 1px solid #ccc;
+
+  
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-selector select:hover {
+  border-color: #4a90e2;
+}
+
+.mode-selector.dark select:hover {
+  border-color: #4a90e2;
+  background-color: #3c3c4e;
 }
 
 /* Dark mode toggle switch */
