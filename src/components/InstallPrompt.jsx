@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 
+// Helper functions
+const isIos = () => {
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(userAgent);
+};
+
+const isInStandaloneMode = () =>
+  'standalone' in window.navigator && window.navigator.standalone;
+
 const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [showIosPrompt, setShowIosPrompt] = useState(false);
 
   useEffect(() => {
+    // Handle Android install prompt
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -14,6 +25,13 @@ const InstallPrompt = () => {
       }, 3000);
     };
 
+    // Handle iOS prompt
+    if (isIos() && !isInStandaloneMode()) {
+      setTimeout(() => {
+        setShowIosPrompt(true);
+      }, 3000);
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
@@ -21,32 +39,31 @@ const InstallPrompt = () => {
     };
   }, []);
 
- const handleInstallClick = () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-        setTimeout(() => {
-          setShowToast(true);
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choice) => {
+        if (choice.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
           setTimeout(() => {
-            setShowToast(false);
-          }, 4000);
+            setShowToast(true);
+            setTimeout(() => {
+              setShowToast(false);
+            }, 4000);
+          }, 6000);
+        } else {
+          console.log('User dismissed the install prompt');
+        }
 
-        }, 6000);
-
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-
-      setDeferredPrompt(null);
-      setShowPrompt(false);
-    });
-  }
-};
+        setDeferredPrompt(null);
+        setShowPrompt(false);
+      });
+    }
+  };
 
   return (
     <div>
+      {/* Android Install Button */}
       {showPrompt && (
         <button
           onClick={handleInstallClick}
@@ -71,6 +88,27 @@ const InstallPrompt = () => {
         </button>
       )}
 
+      {/* iOS Install Instructions */}
+      {showIosPrompt && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          backgroundColor: '#fff3cd',
+          color: '#856404',
+          padding: '12px 20px',
+          border: '1px solid #ffeeba',
+          borderRadius: '5px',
+          maxWidth: '250px',
+          zIndex: 999
+        }}>
+          <strong>Install this app:</strong><br />
+          Tap the <strong>Share</strong> button, then choose<br />
+          <strong>"Add to Home Screen"</strong>.
+        </div>
+      )}
+
+      {/* Toast Message */}
       {showToast && (
         <div style={{
           position: 'fixed',
@@ -84,10 +122,11 @@ const InstallPrompt = () => {
           zIndex: 1000,
           animation: 'fadeInOut 4s ease-in-out'
         }}>
-           installed successfully!✅
+          Installed successfully! ✅
         </div>
       )}
 
+      {/* Animations */}
       <style>
         {`
           @keyframes pulse {
@@ -106,6 +145,6 @@ const InstallPrompt = () => {
       </style>
     </div>
   );
-}
+};
 
 export default InstallPrompt;
