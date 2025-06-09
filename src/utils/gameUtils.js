@@ -98,6 +98,7 @@ export async function getBossMove(squares) {
                         Board state: ${JSON.stringify(squares)}. Try to make the best possible move for 'O' to win or block 'X'.
                         Make sure 'X' does not win in the next move.
                         Make it impossible for 'X' to win. and make 'O' win at all cost.
+                        Always think of 5 or 6 different ways to win and try to get two ways where you have two chance the 'X' can only block one
                         Return only {move: the index number (0-8) of the best move, win: if x will win or O will win the next move}.`
         const result = await model.generateContent(prompt)
         const response = await result.response

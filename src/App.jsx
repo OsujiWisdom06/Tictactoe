@@ -29,7 +29,7 @@ function App() {
     ? `🎉 Winner: ${winner}`
     : isDraw
     ? "🤝 It's a draw!"
-    : `Next Player: ${xIsNext ? "X" : "O"}`;
+    : `Next Player: ${xIsNext ?  "X" : "O"}`;
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}
