@@ -5,6 +5,7 @@ export function useGameHook() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [step, setStep] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
+  const [nextPlayer, setNextPlayer] = useState(() => localStorage.getItem("ticTacToeNextPlayer") || "X");
   const [scores, setScores] = useState({ X: 0, O: 0 });
   const [mode, setMode] = useState(() => localStorage.getItem("ticTacToeMode") || "PvP");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("ticTacToeDark") === "true");
@@ -33,6 +34,18 @@ export function useGameHook() {
   useEffect(() => {
     localStorage.setItem("ticTacToeDifficulty", difficulty);
   }, [difficulty]);
+
+  const setStartPlayer = () => {    
+    if (winner == "X" || nextPlayer == "X" ) {
+      setNextPlayer("O")
+      localStorage.setItem("ticTacToeNextPlayer", JSON.stringify("O"));
+      setXIsNext(false)
+    } else if (winner == "O" || nextPlayer == "O") {
+      setNextPlayer("X")
+      localStorage.setItem("ticTacToeNextPlayer", JSON.stringify("X"));
+      setXIsNext(true)
+   }
+ }
 
   useEffect(() => {
     resetGame();
@@ -95,7 +108,10 @@ export function useGameHook() {
   const resetGame = () => {
     setHistory([Array(9).fill(null)]);
     setStep(0);
-    setXIsNext(true);
+    // setXIsNext(true);
+    //  if (winner !== undefined || isDraw) {
+      setStartPlayer()
+    // }
   };
 
   const resetScores = () => {
