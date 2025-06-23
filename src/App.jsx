@@ -54,7 +54,7 @@ function App() {
       <InstallPrompt />
       <ThemeMode darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <h1>Tic Tac Toe</h1>
+      <h1>TicTac War</h1>
 
       <div className={`mode-selector ${darkMode ? "dark" : ""}`}>
         <label>
