@@ -17,7 +17,7 @@ export default defineConfig({
         name: 'TicTac War',
         short_name: 'TicTac War',
         description: 'A classic Tic Tac Toe game built with React.Js that allows users to play in two modes.',
-        theme_color: '#ffffff',
+        theme_color: 'blue',
         background_color: 'white',
         display: 'standalone',
         start_url: '/',
