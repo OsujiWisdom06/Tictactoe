@@ -4,6 +4,7 @@ import Board from "./components/Board";
 import ThemeMode from "./components/ThemeMode";
 import { useGameHook } from "./hooks/gameHooks";
 import { useEffect, useState } from "react";
+import confetti from "canvas-confetti"; // 🎉 Confetti on win
 
 function App() {
   const {
@@ -35,9 +36,17 @@ function App() {
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
-  // Countdown & auto-reset after win/draw
+  // Countdown & confetti + auto-reset after win/draw
   useEffect(() => {
     if (winner || isDraw) {
+      if (winner) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }
+
       setCountdown(3); // Start from 3 seconds
 
       const interval = setInterval(() => {
@@ -94,7 +103,7 @@ function App() {
 
       <Board
         squares={current}
-        onClick={(i) => countdown === null && handlePlay(i)} // disable clicks during countdown
+        onClick={(i) => countdown === null && handlePlay(i)}
         winningLine={winningLine}
       />
 

@@ -111,6 +111,22 @@ body.dark {
   transition: 0.2s ease;
 }
 
+.square.win {
+  background-color: #c8f7c5;
+  box-shadow: 0 0 15px #2ecc71;
+  animation: glowWin 1s ease-in-out infinite alternate;
+}
+
+@keyframes glowWin {
+  from {
+    box-shadow: 0 0 5px #2ecc71;
+  }
+  to {
+    box-shadow: 0 0 15px #27ae60;
+  }
+}
+
+
 .square:hover {
   background-color: #e6f0ff;
 }
