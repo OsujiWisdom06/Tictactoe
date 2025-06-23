@@ -72,18 +72,6 @@ function App() {
         <button onClick={resetGame} disabled={step === 0}>
           Reset
         </button>
-        <button
-          onClick={() => step > 0 && jumpTo(step - 1)}
-          disabled={step === 0 || winningLine !== null}
-        >
-          Undo
-        </button>
-        <button
-          onClick={() => step < history.length - 1 && jumpTo(step + 1)}
-          disabled={step === history.length - 1}
-        >
-          Redo
-        </button>
         {/* made a disable function and pushed down the reset score button */}
         <button onClick={resetScores} 
         disabled={scores.X === 0 && scores.O === 0} 
