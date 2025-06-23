@@ -31,7 +31,7 @@ const InstallPrompt = () => {
         setShowIosPrompt(true);
         setTimeout(() => {
           setShowIosPrompt(false);
-        }, 6000);
+        }, 10000);
       }, 2000);
     }
 

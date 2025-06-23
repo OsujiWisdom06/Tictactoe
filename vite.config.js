@@ -14,8 +14,8 @@ export default defineConfig({
         'pwa-512x512.png'
       ],
       manifest: {
-        name: 'Tic-tac-toe',
-        short_name: 'Tic-tac-toe',
+        name: 'TicTac War',
+        short_name: 'TicTac War',
         description: 'A classic Tic Tac Toe game built with React.Js that allows users to play in two modes.',
         theme_color: '#ffffff',
         background_color: 'white',
