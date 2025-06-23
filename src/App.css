@@ -277,3 +277,17 @@ input:checked + .slider:before {
     transform: scale(1.1);
   }
 }
+
+.next-round-msg {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #16a085;
+  animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: scale(0.9); }
+  30% { opacity: 1; transform: scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.95); }
+}

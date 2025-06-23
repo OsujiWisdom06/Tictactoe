@@ -3,6 +3,7 @@ import InstallPrompt from "./components/InstallPrompt";
 import Board from "./components/Board";
 import ThemeMode from "./components/ThemeMode";
 import { useGameHook } from "./hooks/gameHooks";
+import { useEffect, useState } from "react";
 
 function App() {
   const {
@@ -25,15 +26,31 @@ function App() {
     resetGame,
     resetScores,
   } = useGameHook();
+
+  const [showNextRoundMsg, setShowNextRoundMsg] = useState(false);
+
   const status = winner
     ? `🎉 Winner: ${winner}`
     : isDraw
     ? "🤝 It's a draw!"
-    : `Next Player: ${xIsNext ?  "X" : "O"}`;
+    : `Next Player: ${xIsNext ? "X" : "O"}`;
+
+  // Auto-reset game after win/draw with message
+  useEffect(() => {
+    if (winner || isDraw) {
+      setShowNextRoundMsg(true);
+
+      const timeout = setTimeout(() => {
+        setShowNextRoundMsg(false);
+        resetGame();
+      }, 2000); // 2 seconds
+
+      return () => clearTimeout(timeout);
+    }
+  }, [winner, isDraw, resetGame]);
 
   return (
-    <div className={`game ${darkMode ? "dark" : ""}`}
-     >
+    <div className={`game ${darkMode ? "dark" : ""}`}>
       <InstallPrompt />
       <ThemeMode darkMode={darkMode} setDarkMode={setDarkMode} />
 
@@ -50,7 +67,10 @@ function App() {
         {mode === "PvC" && (
           <label style={{ marginLeft: "15px" }}>
             Difficulty:
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
               <option value="easy">😊 Easy</option>
               <option value="medium">😐 Medium</option>
               <option value="hard">😈 Hard</option>
@@ -62,6 +82,10 @@ function App() {
 
       <div className="status">{status}</div>
 
+      {showNextRoundMsg && (
+        <div className="next-round-msg">⏳ Next round starting...</div>
+      )}
+
       <Board
         squares={current}
         onClick={(i) => handlePlay(i)}
@@ -72,9 +96,9 @@ function App() {
         <button onClick={resetGame} disabled={step === 0}>
           Reset
         </button>
-        {/* made a disable function and pushed down the reset score button */}
-        <button onClick={resetScores} 
-        disabled={scores.X === 0 && scores.O === 0} 
+        <button
+          onClick={resetScores}
+          disabled={scores.X === 0 && scores.O === 0}
         >
           Reset Score
         </button>
