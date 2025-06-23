@@ -27,7 +27,7 @@ function App() {
     resetScores,
   } = useGameHook();
 
-  const [showNextRoundMsg, setShowNextRoundMsg] = useState(false);
+  const [countdown, setCountdown] = useState(null); // Countdown state
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -35,17 +35,23 @@ function App() {
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
-  // Auto-reset game after win/draw with message
+  // Countdown & auto-reset after win/draw
   useEffect(() => {
     if (winner || isDraw) {
-      setShowNextRoundMsg(true);
+      setCountdown(3); // Start from 3 seconds
 
-      const timeout = setTimeout(() => {
-        setShowNextRoundMsg(false);
-        resetGame();
-      }, 2000); // 2 seconds
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(interval);
+            resetGame();
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-      return () => clearTimeout(timeout);
+      return () => clearInterval(interval);
     }
   }, [winner, isDraw, resetGame]);
 
@@ -82,23 +88,23 @@ function App() {
 
       <div className="status">{status}</div>
 
-      {showNextRoundMsg && (
-        <div className="next-round-msg">⏳ Next round starting...</div>
+      {countdown !== null && (
+        <div className="next-round-msg">⏳ Next round in: {countdown}</div>
       )}
 
       <Board
         squares={current}
-        onClick={(i) => handlePlay(i)}
+        onClick={(i) => countdown === null && handlePlay(i)} // disable clicks during countdown
         winningLine={winningLine}
       />
 
       <div className={`controls ${darkMode ? "dark" : ""}`}>
-        <button onClick={resetGame} disabled={step === 0}>
+        <button onClick={resetGame} disabled={step === 0 || countdown !== null}>
           Reset
         </button>
         <button
           onClick={resetScores}
-          disabled={scores.X === 0 && scores.O === 0}
+          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null}
         >
           Reset Score
         </button>
