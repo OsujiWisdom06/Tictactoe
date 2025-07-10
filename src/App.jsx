@@ -36,54 +36,21 @@ function App() {
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); // Manual pause toggle
+  const [isPaused, setIsPaused] = useState(false);
 
   const status = winner
     ? `🎉 Winner: ${winner}`
     : isDraw
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
-const getOverlayMessage = () => {
-  if (showNextRoundMsg) {
-    if (timeUp) {
-      if (winner) {
-        return `⏰ Time's up!\n🎉 Winner: ${winner}\nNext round starting...`;
-      } else if (isDraw) {
-        return `⏰ Time's up!\n🤝 It's a draw!\nNext round starting...`;
-      } else {
-        return `⏰ Time's up!\nNext round starting...`;
-      }
-    }
 
-    if (mode === "PvP") {
-      return winner
-        ? `🎉 Winner: ${winner}\nNext round starting...`
-        : `🤝 It's a draw!\nNext round starting...`;
+  const getOverlayMessage = () => {
+    if (showNextRoundMsg) {
+      return `⏰ Time's up!\nNext round starting...`;
     } else {
-      if (winner === "X") {
-        switch (difficulty) {
-          case "easy":
-            return `😊 You beat Easy mode!\nNext round starting...`;
-          case "medium":
-            return `😐 Nice! You won Medium.\nNext round starting...`;
-          case "hard":
-            return `😈 Tough match! You won.\nNext round starting...`;
-          case "boss":
-            return `👑 You defeated the Boss!\nNext round starting...`;
-          default:
-            return `🔥 You win!\nNext round starting...`;
-        }
-      } else if (winner === "O") {
-        return `💀 The AI won!\nNext round starting...`;
-      } else {
-        return `🤝 It's a draw!\nNext round starting...`;
-      }
+      return countdown === 0 ? "GO!" : countdown.toString();
     }
-  } else {
-    return countdown === 0 ? "GO!" : countdown.toString();
-  }
-};
-
+  };
 
   // Load saved timer
   useEffect(() => {
@@ -110,12 +77,7 @@ const getOverlayMessage = () => {
       setTimeUp(true);
       setTimerActive(false);
       setShowNextRoundMsg(true);
-
-      setTimeout(() => {
-        setShowNextRoundMsg(false);
-      }, 1500);
-
-      setCountdown(3); // 🔥 FIXED: Start countdown immediately
+      setCountdown(3);
     }
 
     const interval = setInterval(() => {
@@ -130,7 +92,7 @@ const getOverlayMessage = () => {
     return () => clearInterval(interval);
   }, [timerActive, gameTimeLeft, timeUp, isPaused]);
 
-  // Pause/resume based on tab visibility
+  // Pause/resume on visibility
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -144,48 +106,40 @@ const getOverlayMessage = () => {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft, isPaused]);
 
-  // Win/draw logic
+  // Confetti on win (optional)
   useEffect(() => {
-    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
-      if (winner && (mode === "PvP" || (mode === "PvC" && winner === "X"))) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-      }
-      setShowNextRoundMsg(true);
-      const msgTimeout = setTimeout(() => {
-        setShowNextRoundMsg(false);
-      }, 1500);
-      setCountdown(3);
-      return () => clearTimeout(msgTimeout);
+    if (winner && (mode === "PvP" || (mode === "PvC" && winner === "X"))) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
     }
-  }, [winner, isDraw]);
+  }, [winner]);
 
-  // Countdown animation (for both win/draw and time-up)
+  // Countdown after time up
   useEffect(() => {
     if (countdown === null) return;
 
-   if (countdown === 0) {
-  const timeout = setTimeout(() => {
-    resetGame();
-    resetScores(); // clear scores after timer ends
-    setCountdown(null);
-    setShowNextRoundMsg(false);
-    setTimeUp(false);
-    setTimerActive(true);
-    setGameTimeLeft(300);
-    localStorage.removeItem(TIMER_KEY);
-    localStorage.removeItem(TIMESTAMP_KEY);
-  }, 2000);
-  return () => clearTimeout(timeout);
-}
-
+    if (countdown === 0) {
+      const timeout = setTimeout(() => {
+        resetGame();
+        resetScores();
+        setCountdown(null);
+        setShowNextRoundMsg(false);
+        setTimeUp(false);
+        setTimerActive(true);
+        setGameTimeLeft(300);
+        localStorage.removeItem(TIMER_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
 
     const interval = setInterval(() => {
       setCountdown((prev) => prev - 1);
     }, 1000);
+
     return () => clearInterval(interval);
   }, [countdown]);
 
