@@ -37,7 +37,39 @@ function App() {
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
-  // Show "Next round starting..." message before countdown
+  // 👑 Message builder for overlay
+  const getOverlayMessage = () => {
+    if (showNextRoundMsg) {
+      if (mode === "PvP") {
+        return winner
+          ? `🎉 Winner: ${winner}\nNext round starting...`
+          : `🤝 It's a draw!\nNext round starting...`;
+      } else {
+        if (winner === "X") {
+          switch (difficulty) {
+            case "easy":
+              return `😊 You beat Easy mode!\nNext round starting...`;
+            case "medium":
+              return `😐 Nice! You won Medium.\nNext round starting...`;
+            case "hard":
+              return `😈 Tough match! You won.\nNext round starting...`;
+            case "boss":
+              return `👑 You defeated the Boss!\nNext round starting...`;
+            default:
+              return `🔥 You win!\nNext round starting...`;
+          }
+        } else if (winner === "O") {
+          return `💀 The AI won!\nNext round starting...`;
+        } else {
+          return `🤝 It's a draw!\nNext round starting...`;
+        }
+      }
+    } else {
+      return countdown === 0 ? "GO!" : countdown.toString();
+    }
+  };
+
+  // 🧨 Trigger countdown after win/draw
   useEffect(() => {
     if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
       if (winner) {
@@ -53,13 +85,13 @@ function App() {
       const msgTimeout = setTimeout(() => {
         setShowNextRoundMsg(false);
         setCountdown(3);
-      }, 1500); // Show message for 1.5 seconds
+      }, 1500);
 
       return () => clearTimeout(msgTimeout);
     }
   }, [winner, isDraw]);
 
-  // Countdown logic with "GO!" and reset
+  // ⏱️ Countdown + GO + Reset
   useEffect(() => {
     if (countdown === null) return;
 
@@ -67,7 +99,7 @@ function App() {
       const timeout = setTimeout(() => {
         resetGame();
         setCountdown(null);
-      }, 1000); // Show "GO!" for 1 second
+      }, 1000);
       return () => clearTimeout(timeout);
     }
 
@@ -111,7 +143,6 @@ function App() {
 
       <div className="status">{status}</div>
 
-      {/* Countdown Overlay */}
       {(showNextRoundMsg || countdown !== null) && (
         <div className="countdown-overlay">
           <div
@@ -119,11 +150,9 @@ function App() {
               showNextRoundMsg ? "fade-slow" : "zoomFade"
             }`}
           >
-            {showNextRoundMsg
-              ? "Next round starting..."
-              : countdown === 0
-              ? "GO!"
-              : countdown}
+            {getOverlayMessage().split("\n").map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
           </div>
         </div>
       )}

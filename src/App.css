@@ -368,7 +368,13 @@ input:checked + .slider:before {
   text-align: center;
 }
 
-/* Zoom for 3, 2, 1, GO! */
+.countdown-number div {
+  font-size: 2.4rem;
+  line-height: 1.4;
+  margin-top: 0.3rem;
+}
+
+/* Animations */
 .zoomFade {
   animation: zoomFade 1s ease-in-out;
 }
@@ -388,7 +394,6 @@ input:checked + .slider:before {
   }
 }
 
-/* Slow fade for "Next round starting..." */
 .fade-slow {
   animation: fadeInOut 1.5s ease-in-out;
 }
