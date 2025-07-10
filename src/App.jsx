@@ -36,6 +36,7 @@ function App() {
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Manual pause toggle
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -92,18 +93,23 @@ function App() {
     }
   }, []);
 
-  // Timer countdown
+  // Timer countdown (respects pause)
   useEffect(() => {
-    if (!timerActive || timeUp) return;
+    if (!timerActive || timeUp || isPaused) return;
 
     if (gameTimeLeft <= 0) {
       setTimeUp(true);
       setTimerActive(false);
       setShowNextRoundMsg(true);
+
       const msgTimeout = setTimeout(() => {
         setShowNextRoundMsg(false);
         setCountdown(3);
+        setGameTimeLeft(300); // Restart timer
+        localStorage.removeItem(TIMER_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
       }, 1500);
+
       return () => clearTimeout(msgTimeout);
     }
 
@@ -117,21 +123,21 @@ function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, gameTimeLeft, timeUp]);
+  }, [timerActive, gameTimeLeft, timeUp, isPaused]);
 
   // Pause/resume based on tab visibility
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
         setTimerActive(false);
-      } else if (!timeUp && gameTimeLeft > 0) {
+      } else if (!timeUp && gameTimeLeft > 0 && !isPaused) {
         setTimerActive(true);
         localStorage.setItem(TIMESTAMP_KEY, Date.now().toString());
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [timeUp, gameTimeLeft]);
+  }, [timeUp, gameTimeLeft, isPaused]);
 
   // Win/draw logic
   useEffect(() => {
@@ -160,11 +166,9 @@ function App() {
       const timeout = setTimeout(() => {
         resetGame();
         setCountdown(null);
+        setShowNextRoundMsg(false);
         setTimeUp(false);
         setTimerActive(true);
-        setGameTimeLeft(300);
-        localStorage.removeItem(TIMER_KEY);
-        localStorage.removeItem(TIMESTAMP_KEY);
       }, 1000);
       return () => clearTimeout(timeout);
     }
@@ -219,10 +223,16 @@ function App() {
         </div>
       )}
 
+      {isPaused && !timeUp && (
+        <div className="pause-overlay">
+          <div className="pause-text">⏸ Paused</div>
+        </div>
+      )}
+
       <Board
         squares={current}
         onClick={(i) =>
-          countdown === null && !showNextRoundMsg && !timeUp && handlePlay(i)
+          countdown === null && !showNextRoundMsg && !timeUp && !isPaused && handlePlay(i)
         }
         winningLine={winningLine}
       />
@@ -233,11 +243,15 @@ function App() {
         </button>
         <button
           onClick={resetScores}
-          disabled={
-            (scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp
-          }
+          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp}
         >
           Reset Score
+        </button>
+        <button
+          onClick={() => setIsPaused((prev) => !prev)}
+          disabled={countdown !== null || showNextRoundMsg || timeUp}
+        >
+          {isPaused ? "▶️ Resume Timer" : "⏸ Pause Timer"}
         </button>
       </div>
 
