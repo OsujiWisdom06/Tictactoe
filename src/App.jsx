@@ -85,7 +85,7 @@ function App() {
       const msgTimeout = setTimeout(() => {
         setShowNextRoundMsg(false);
         setCountdown(3);
-      }, 1500);
+      }, 2000);
 
       return () => clearTimeout(msgTimeout);
     }
@@ -99,13 +99,13 @@ function App() {
       const timeout = setTimeout(() => {
         resetGame();
         setCountdown(null);
-      }, 1000);
+      }, 2000);
       return () => clearTimeout(timeout);
     }
 
     const interval = setInterval(() => {
       setCountdown((prev) => prev - 1);
-    }, 1000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [countdown]);
