@@ -111,6 +111,45 @@ body.dark {
   transition: 0.2s ease;
 }
 
+.timer {
+  font-size: 1.1rem;
+  color: #3498db;
+  margin: 8px 0;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #e74c3c;
+  box-shadow: 0 0 10px #333;
+}
+
+.popup-content button {
+  margin-top: 15px;
+  padding: 8px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .square.win {
   background-color: #c8f7c5;
   box-shadow: 0 0 15px #2ecc71;
@@ -306,4 +345,40 @@ input:checked + .slider:before {
   30% { opacity: 1; transform: scale(1); }
   70% { opacity: 1; }
   100% { opacity: 0; transform: scale(0.95); }
+}
+
+.countdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.countdown-number {
+  font-size: 8rem;
+  font-weight: bold;
+  color: #fff;
+  animation: zoom 1s ease-in-out;
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
 }

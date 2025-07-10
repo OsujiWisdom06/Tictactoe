@@ -4,7 +4,7 @@ import Board from "./components/Board";
 import ThemeMode from "./components/ThemeMode";
 import { useGameHook } from "./hooks/gameHooks";
 import { useEffect, useState } from "react";
-import confetti from "canvas-confetti"; // 🎉 Confetti on win
+import confetti from "canvas-confetti";
 
 function App() {
   const {
@@ -28,7 +28,7 @@ function App() {
     resetScores,
   } = useGameHook();
 
-  const [countdown, setCountdown] = useState(null); // Countdown state
+  const [countdown, setCountdown] = useState(null);
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -36,9 +36,9 @@ function App() {
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
-  // Countdown & confetti + auto-reset after win/draw
+  // Start countdown when there's a win or draw
   useEffect(() => {
-    if (winner || isDraw) {
+    if ((winner || isDraw) && countdown === null) {
       if (winner) {
         confetti({
           particleCount: 100,
@@ -46,23 +46,26 @@ function App() {
           origin: { y: 0.6 },
         });
       }
-
-      setCountdown(3); // Start from 3 seconds
-
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev === 1) {
-            clearInterval(interval);
-            resetGame();
-            return null;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(interval);
+      setCountdown(3); // Start countdown
     }
-  }, [winner, isDraw, resetGame]);
+  }, [winner, isDraw]);
+
+  // Handle countdown + reset game
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      resetGame();
+      setCountdown(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [countdown]);
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}>
@@ -97,8 +100,11 @@ function App() {
 
       <div className="status">{status}</div>
 
+      {/* ⏳ Animated countdown overlay */}
       {countdown !== null && (
-        <div className="next-round-msg">⏳ Next round in: {countdown}</div>
+        <div className="countdown-overlay">
+          <div className="countdown-number">{countdown}</div>
+        </div>
       )}
 
       <Board
