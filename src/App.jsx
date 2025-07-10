@@ -104,7 +104,10 @@ function App() {
 
       const msgTimeout = setTimeout(() => {
         setShowNextRoundMsg(false);
-        setCountdown(3); // Start countdown animation
+        setCountdown(3);
+        setGameTimeLeft(300); // Restart timer
+        localStorage.removeItem(TIMER_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
       }, 1500);
 
       return () => clearTimeout(msgTimeout);
@@ -155,7 +158,7 @@ function App() {
     }
   }, [winner, isDraw]);
 
-  // Countdown animation (for both win/draw and time-up)
+  // Countdown after result or time up
   useEffect(() => {
     if (countdown === null) return;
 
@@ -166,9 +169,6 @@ function App() {
         setShowNextRoundMsg(false);
         setTimeUp(false);
         setTimerActive(true);
-        setGameTimeLeft(300);
-        localStorage.removeItem(TIMER_KEY);
-        localStorage.removeItem(TIMESTAMP_KEY);
       }, 1000);
       return () => clearTimeout(timeout);
     }
