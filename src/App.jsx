@@ -29,6 +29,7 @@ function App() {
   } = useGameHook();
 
   const [countdown, setCountdown] = useState(null);
+  const [showNextRoundMsg, setShowNextRoundMsg] = useState(false);
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -36,9 +37,9 @@ function App() {
     ? "🤝 It's a draw!"
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
-  // Start countdown when there's a win or draw
+  // Show "Next round starting..." message before countdown
   useEffect(() => {
-    if ((winner || isDraw) && countdown === null) {
+    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
       if (winner) {
         confetti({
           particleCount: 100,
@@ -46,18 +47,28 @@ function App() {
           origin: { y: 0.6 },
         });
       }
-      setCountdown(3); // Start countdown
+
+      setShowNextRoundMsg(true);
+
+      const msgTimeout = setTimeout(() => {
+        setShowNextRoundMsg(false);
+        setCountdown(3);
+      }, 1500); // Show message for 1.5 seconds
+
+      return () => clearTimeout(msgTimeout);
     }
   }, [winner, isDraw]);
 
-  // Handle countdown + reset game
+  // Countdown logic with "GO!" and reset
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown === 0) {
-      resetGame();
-      setCountdown(null);
-      return;
+      const timeout = setTimeout(() => {
+        resetGame();
+        setCountdown(null);
+      }, 1000); // Show "GO!" for 1 second
+      return () => clearTimeout(timeout);
     }
 
     const interval = setInterval(() => {
@@ -100,26 +111,45 @@ function App() {
 
       <div className="status">{status}</div>
 
-      {/* ⏳ Animated countdown overlay */}
-      {countdown !== null && (
+      {/* Countdown Overlay */}
+      {(showNextRoundMsg || countdown !== null) && (
         <div className="countdown-overlay">
-          <div className="countdown-number">{countdown}</div>
+          <div
+            className={`countdown-number ${
+              showNextRoundMsg ? "fade-slow" : "zoomFade"
+            }`}
+          >
+            {showNextRoundMsg
+              ? "Next round starting..."
+              : countdown === 0
+              ? "GO!"
+              : countdown}
+          </div>
         </div>
       )}
 
       <Board
         squares={current}
-        onClick={(i) => countdown === null && handlePlay(i)}
+        onClick={(i) =>
+          countdown === null && !showNextRoundMsg && handlePlay(i)
+        }
         winningLine={winningLine}
       />
 
       <div className={`controls ${darkMode ? "dark" : ""}`}>
-        <button onClick={resetGame} disabled={step === 0 || countdown !== null}>
+        <button
+          onClick={resetGame}
+          disabled={step === 0 || countdown !== null || showNextRoundMsg}
+        >
           Reset
         </button>
         <button
           onClick={resetScores}
-          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null}
+          disabled={
+            (scores.X === 0 && scores.O === 0) ||
+            countdown !== null ||
+            showNextRoundMsg
+          }
         >
           Reset Score
         </button>
