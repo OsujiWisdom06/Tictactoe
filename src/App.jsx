@@ -102,12 +102,11 @@ function App() {
       setTimerActive(false);
       setShowNextRoundMsg(true);
 
-      const msgTimeout = setTimeout(() => {
+      setTimeout(() => {
         setShowNextRoundMsg(false);
-        setCountdown(3); // Start countdown animation
       }, 1500);
 
-      return () => clearTimeout(msgTimeout);
+      setCountdown(3); // 🔥 FIXED: Start countdown immediately
     }
 
     const interval = setInterval(() => {
@@ -139,7 +138,7 @@ function App() {
   // Win/draw logic
   useEffect(() => {
     if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
-      if (winner) {
+      if (winner && (mode === "PvP" || (mode === "PvC" && winner === "X"))) {
         confetti({
           particleCount: 100,
           spread: 70,
@@ -149,8 +148,8 @@ function App() {
       setShowNextRoundMsg(true);
       const msgTimeout = setTimeout(() => {
         setShowNextRoundMsg(false);
-        setCountdown(3);
       }, 1500);
+      setCountdown(3);
       return () => clearTimeout(msgTimeout);
     }
   }, [winner, isDraw]);
@@ -215,7 +214,11 @@ function App() {
 
       {(showNextRoundMsg || countdown !== null) && (
         <div className="countdown-overlay">
-          <div className={`countdown-number ${showNextRoundMsg ? "fade-slow" : "zoomFade"}`}>
+          <div
+            className={`countdown-number ${
+              countdown !== null ? "zoomFade" : "fade-slow"
+            }`}
+          >
             {getOverlayMessage().split("\n").map((line, i) => (
               <div key={i}>{line}</div>
             ))}
