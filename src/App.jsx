@@ -133,9 +133,9 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Win/draw detection – show overlay only (no reset yet)
+  // Win/draw detection
   useEffect(() => {
-    if ((winner || isDraw) && countdown === null && !showNextRoundMsg && !timeUp) {
+    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
       if (winner) {
         confetti({
           particleCount: 100,
@@ -150,7 +150,7 @@ function App() {
       }, 1500);
       return () => clearTimeout(msgTimeout);
     }
-  }, [winner, isDraw, countdown, showNextRoundMsg, timeUp]);
+  }, [winner, isDraw]);
 
   // Final countdown before game reset
   useEffect(() => {
@@ -159,28 +159,23 @@ function App() {
     if (countdown === 0) {
       const timeout = setTimeout(() => {
         setCountdown(null);
-        setShowNextRoundMsg(false);
 
-        if (timeUp) {
-          // ✅ Reset timer + game only if time is up
-          setGameTimeLeft(300);
-          setTimeUp(false);
-          setTimerActive(true);
-          localStorage.removeItem(TIMER_KEY);
-          localStorage.removeItem(TIMESTAMP_KEY);
-          resetScores(); // Optional
-        }
-
-        resetGame(); // Always reset game
+        // ✅ Reset timer and game together every round
+        setGameTimeLeft(300);
+        setTimeUp(false);
+        setTimerActive(true);
+        localStorage.removeItem(TIMER_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
+        resetGame();
       }, 1000);
       return () => clearTimeout(timeout);
     }
 
     const interval = setInterval(() => {
-      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+      setCountdown((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [countdown, timeUp]);
+  }, [countdown]);
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}>
