@@ -71,11 +71,11 @@ function App() {
         }
       }
     } else {
-      return countdown === 0 ? "GO!" : countdown.toString();
+      return countdown === 0 ? "GO!" : countdown?.toString();
     }
   };
 
-  // Load saved timer
+  // Load timer from localStorage
   useEffect(() => {
     const savedTime = localStorage.getItem(TIMER_KEY);
     const savedTimestamp = localStorage.getItem(TIMESTAMP_KEY);
@@ -92,19 +92,13 @@ function App() {
     }
   }, []);
 
-  // Timer countdown
+  // Timer countdown logic
   useEffect(() => {
     if (!timerActive || timeUp) return;
 
     if (gameTimeLeft <= 0) {
       setTimeUp(true);
       setTimerActive(false);
-      setShowNextRoundMsg(true);
-      const msgTimeout = setTimeout(() => {
-        setShowNextRoundMsg(false);
-        setCountdown(3);
-      }, 1500);
-      return () => clearTimeout(msgTimeout);
     }
 
     const interval = setInterval(() => {
@@ -119,7 +113,7 @@ function App() {
     return () => clearInterval(interval);
   }, [timerActive, gameTimeLeft, timeUp]);
 
-  // Pause/resume on tab visibility
+  // Pause timer on tab blur
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -133,9 +127,9 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Win/draw detection
+  // Handle win/draw countdown (only resets game)
   useEffect(() => {
-    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
+    if ((winner || isDraw) && countdown === null && !showNextRoundMsg && !timeUp) {
       if (winner) {
         confetti({
           particleCount: 100,
@@ -144,43 +138,54 @@ function App() {
         });
       }
       setShowNextRoundMsg(true);
-      const msgTimeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         setShowNextRoundMsg(false);
         setCountdown(3);
       }, 1500);
-      return () => clearTimeout(msgTimeout);
+      return () => clearTimeout(timeout);
     }
-  }, [winner, isDraw]);
+  }, [winner, isDraw, timeUp]);
 
-  // Final countdown before game reset
- useEffect(() => {
-  if (countdown === null) return;
+  // Handle timeUp message and 3-second countdown
+  useEffect(() => {
+    if (timeUp) {
+      setShowNextRoundMsg(true);
+      const delay = setTimeout(() => {
+        setShowNextRoundMsg(false);
+        setCountdown(3);
+      }, 1500);
+      return () => clearTimeout(delay);
+    }
+  }, [timeUp]);
 
-  if (countdown === 0) {
-    const timeout = setTimeout(() => {
-      setCountdown(null);
-      setShowNextRoundMsg(false);
+  // Final countdown before resetting game or everything
+  useEffect(() => {
+    if (countdown === null) return;
 
-      if (timeUp) {
-        // ✅ Only reset timer when 5 minutes has expired
-        setGameTimeLeft(300);
-        setTimeUp(false);
-        setTimerActive(true);
-        localStorage.removeItem(TIMER_KEY);
-        localStorage.removeItem(TIMESTAMP_KEY);
-        resetScores(); // Optional: remove if you want to keep score after 5 minutes
-      }
+    if (countdown === 0) {
+      const timeout = setTimeout(() => {
+        setCountdown(null);
 
-      resetGame(); // Always reset game
+        if (timeUp) {
+          // Full reset after time's up
+          setGameTimeLeft(300);
+          setTimeUp(false);
+          setTimerActive(true);
+          localStorage.removeItem(TIMER_KEY);
+          localStorage.removeItem(TIMESTAMP_KEY);
+          resetScores(); // Optional: reset score on timeout
+        }
+
+        resetGame(); // Always reset game board
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
-    return () => clearTimeout(timeout);
-  }
-
-  const interval = setInterval(() => {
-    setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
-  }, 1000);
-  return () => clearInterval(interval);
-}, [countdown, timeUp]);
+    return () => clearInterval(interval);
+  }, [countdown, timeUp]);
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}>
@@ -208,7 +213,7 @@ function App() {
               <option value="easy">😊 Easy</option>
               <option value="medium">😐 Medium</option>
               <option value="hard">😈 Hard</option>
-              <option value="boss">👑 Boss Level(AI)</option>
+              <option value="boss">👑 Boss Level (AI)</option>
             </select>
           </label>
         )}
