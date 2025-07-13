@@ -31,6 +31,7 @@ function App() {
     resetScores,
   } = useGameHook();
 
+  const [countdown, setCountdown] = useState(null);
   const [showNextRoundMsg, setShowNextRoundMsg] = useState(false);
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
@@ -43,7 +44,35 @@ function App() {
     : `Next Player: ${xIsNext ? "X" : "O"}`;
 
   const getOverlayMessage = () => {
-    return `⏰ Time's up!\nNew round starting...`;
+    if (showNextRoundMsg) {
+      if (timeUp) return `⏰ Time's up!\nNew round starting...`;
+      if (mode === "PvP") {
+        return winner
+          ? `🎉 Winner: ${winner}\nNext round starting...`
+          : `🤝 It's a draw!\nNext round starting...`;
+      } else {
+        if (winner === "X") {
+          switch (difficulty) {
+            case "easy":
+              return `😊 You beat Easy mode!\nNext round starting...`;
+            case "medium":
+              return `😐 Nice! You won Medium.\nNext round starting...`;
+            case "hard":
+              return `😈 Tough match! You won.\nNext round starting...`;
+            case "boss":
+              return `👑 You defeated the Boss!\nNext round starting...`;
+            default:
+              return `🔥 You win!\nNext round starting...`;
+          }
+        } else if (winner === "O") {
+          return `💀 The AI won!\nNext round starting...`;
+        } else {
+          return `🤝 It's a draw!\nNext round starting...`;
+        }
+      }
+    } else {
+      return countdown === 0 ? "GO!" : countdown.toString();
+    }
   };
 
   // Load saved timer
@@ -63,7 +92,7 @@ function App() {
     }
   }, []);
 
-  // Timer countdown + reset after 5 minutes
+  // Timer countdown
   useEffect(() => {
     if (!timerActive || timeUp) return;
 
@@ -71,17 +100,10 @@ function App() {
       setTimeUp(true);
       setTimerActive(false);
       setShowNextRoundMsg(true);
-
       const msgTimeout = setTimeout(() => {
-        resetGame();
-        setGameTimeLeft(300);
-        setTimeUp(false);
-        setTimerActive(true);
         setShowNextRoundMsg(false);
-        localStorage.removeItem(TIMER_KEY);
-        localStorage.removeItem(TIMESTAMP_KEY);
-      }, 2000); // Show "Time's up" for 2 seconds
-
+        setCountdown(3);
+      }, 1500);
       return () => clearTimeout(msgTimeout);
     }
 
@@ -97,7 +119,7 @@ function App() {
     return () => clearInterval(interval);
   }, [timerActive, gameTimeLeft, timeUp]);
 
-  // Pause/resume timer when switching tabs
+  // Pause/resume on tab visibility
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -111,9 +133,9 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Confetti and game reset after win/draw
+  // Win/draw detection
   useEffect(() => {
-    if ((winner || isDraw) && !showNextRoundMsg && !timeUp) {
+    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
       if (winner) {
         confetti({
           particleCount: 100,
@@ -121,12 +143,39 @@ function App() {
           origin: { y: 0.6 },
         });
       }
+      setShowNextRoundMsg(true);
       const msgTimeout = setTimeout(() => {
-        resetGame();
-      }, 1000);
+        setShowNextRoundMsg(false);
+        setCountdown(3);
+      }, 1500);
       return () => clearTimeout(msgTimeout);
     }
   }, [winner, isDraw]);
+
+  // Final countdown before game reset
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown === 0) {
+      const timeout = setTimeout(() => {
+        setCountdown(null);
+
+        // ✅ Reset timer and game together every round
+        setGameTimeLeft(300);
+        setTimeUp(false);
+        setTimerActive(true);
+        localStorage.removeItem(TIMER_KEY);
+        localStorage.removeItem(TIMESTAMP_KEY);
+        resetGame();
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}>
@@ -162,9 +211,9 @@ function App() {
 
       <div className="status">{status}</div>
 
-      {showNextRoundMsg && (
+      {(showNextRoundMsg || countdown !== null) && (
         <div className="countdown-overlay">
-          <div className="countdown-number fade-slow">
+          <div className={`countdown-number ${showNextRoundMsg ? "fade-slow" : "zoomFade"}`}>
             {getOverlayMessage().split("\n").map((line, i) => (
               <div key={i}>{line}</div>
             ))}
@@ -175,23 +224,18 @@ function App() {
       <Board
         squares={current}
         onClick={(i) =>
-          !showNextRoundMsg && !timeUp && handlePlay(i)
+          countdown === null && !showNextRoundMsg && !timeUp && handlePlay(i)
         }
         winningLine={winningLine}
       />
 
       <div className={`controls ${darkMode ? "dark" : ""}`}>
-        <button
-          onClick={resetGame}
-          disabled={step === 0 || showNextRoundMsg || timeUp}
-        >
+        <button onClick={resetGame} disabled={step === 0 || countdown !== null || showNextRoundMsg || timeUp}>
           Reset
         </button>
         <button
           onClick={resetScores}
-          disabled={
-            (scores.X === 0 && scores.O === 0) || showNextRoundMsg || timeUp
-          }
+          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp}
         >
           Reset Score
         </button>
