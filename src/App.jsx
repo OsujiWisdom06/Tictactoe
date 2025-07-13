@@ -36,8 +36,9 @@ function App() {
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [round, setRound] = useState(1); // ✅ Round count
-  const [roundsThisSession, setRoundsThisSession] = useState(1); // ✅ Per 5min session
+
+  const [round, setRound] = useState(1);
+  const [roundsThisSession, setRoundsThisSession] = useState(1);
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -77,7 +78,6 @@ function App() {
     }
   };
 
-  // Load timer from localStorage
   useEffect(() => {
     const savedTime = localStorage.getItem(TIMER_KEY);
     const savedTimestamp = localStorage.getItem(TIMESTAMP_KEY);
@@ -94,7 +94,6 @@ function App() {
     }
   }, []);
 
-  // Timer countdown logic
   useEffect(() => {
     if (!timerActive || timeUp) return;
 
@@ -115,7 +114,6 @@ function App() {
     return () => clearInterval(interval);
   }, [timerActive, gameTimeLeft, timeUp]);
 
-  // Pause timer on tab blur
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -129,7 +127,7 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Handle win/draw countdown
+  // Handle win/draw
   useEffect(() => {
     if ((winner || isDraw) && countdown === null && !showNextRoundMsg && !timeUp) {
       if (winner) {
@@ -143,12 +141,13 @@ function App() {
       const timeout = setTimeout(() => {
         setShowNextRoundMsg(false);
         setCountdown(3);
+        setRoundsThisSession((prev) => prev + 1); // ✅ increase session count
       }, 1500);
       return () => clearTimeout(timeout);
     }
   }, [winner, isDraw, timeUp]);
 
-  // Handle timeUp message and countdown
+  // Handle time up
   useEffect(() => {
     if (timeUp) {
       setShowNextRoundMsg(true);
@@ -160,7 +159,6 @@ function App() {
     }
   }, [timeUp]);
 
-  // Final countdown before reset
   useEffect(() => {
     if (countdown === null) return;
 
@@ -169,19 +167,16 @@ function App() {
         setCountdown(null);
 
         if (timeUp) {
-          // Full reset
           setGameTimeLeft(300);
           setTimeUp(false);
           setTimerActive(true);
           localStorage.removeItem(TIMER_KEY);
           localStorage.removeItem(TIMESTAMP_KEY);
-          resetScores();
-          setRoundsThisSession(1); // Reset session round count
-        } else {
-          setRoundsThisSession((prev) => prev + 1); // Increment session round count
+          setRound((prev) => prev + 1); // ✅ main round increment here only
+          setRoundsThisSession(1);
+          resetScores(); // optional
         }
 
-        setRound((prev) => prev + 1); // Increment total round count
         resetGame();
       }, 1000);
       return () => clearTimeout(timeout);
@@ -204,6 +199,10 @@ function App() {
       <ThemeMode darkMode={darkMode} setDarkMode={setDarkMode} />
       <h1>TicTac War</h1>
 
+      <div className="round-info">
+        🏁 Round {round} | 🎮 Games this round: {roundsThisSession}
+      </div>
+
       <div className={`mode-selector ${darkMode ? "dark" : ""}`}>
         <label>
           Mode:
@@ -224,9 +223,6 @@ function App() {
           </label>
         )}
       </div>
-
-      <div className="round-label">🏁 Round {round}</div>
-      <div className="session-tracker">🕒 Rounds this session: {roundsThisSession}</div>
 
       <div className="status">{status}</div>
 
