@@ -153,29 +153,34 @@ function App() {
   }, [winner, isDraw]);
 
   // Final countdown before game reset
-  useEffect(() => {
-    if (countdown === null) return;
+ useEffect(() => {
+  if (countdown === null) return;
 
-    if (countdown === 0) {
-      const timeout = setTimeout(() => {
-        setCountdown(null);
+  if (countdown === 0) {
+    const timeout = setTimeout(() => {
+      setCountdown(null);
+      setShowNextRoundMsg(false);
 
-        // ✅ Reset timer and game together every round
+      if (timeUp) {
+        // ✅ Only reset timer when 5 minutes has expired
         setGameTimeLeft(300);
         setTimeUp(false);
         setTimerActive(true);
         localStorage.removeItem(TIMER_KEY);
         localStorage.removeItem(TIMESTAMP_KEY);
-        resetGame();
-      }, 1000);
-      return () => clearTimeout(timeout);
-    }
+        resetScores(); // Optional: remove if you want to keep score after 5 minutes
+      }
 
-    const interval = setInterval(() => {
-      setCountdown((prev) => prev - 1);
+      resetGame(); // Always reset game
     }, 1000);
-    return () => clearInterval(interval);
-  }, [countdown]);
+    return () => clearTimeout(timeout);
+  }
+
+  const interval = setInterval(() => {
+    setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+  }, 1000);
+  return () => clearInterval(interval);
+}, [countdown, timeUp]);
 
   return (
     <div className={`game ${darkMode ? "dark" : ""}`}>
