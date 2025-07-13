@@ -619,6 +619,69 @@ input:checked + .slider:before {
   border: 1px solid #666;
 }
 
+.scoreboard {
+  background-color: #f3f3f3;
+  padding: 16px;
+  margin-top: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.scoreboard h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: #222;
+}
+
+.score-items {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.score-box {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px 18px;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.x-score {
+  border-left: 5px solid #ff4d4d;
+}
+
+.o-score {
+  border-left: 5px solid #2a9d8f;
+}
+
+.score-box span {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.score-box strong {
+  font-size: 24px;
+  color: #333;
+}
+
+.dark .scoreboard {
+  background-color: #222;
+  color: #f3f3f3;
+}
+
+.dark .score-box {
+  background-color: #333;
+  color: #fff;
+}
+
+
 
 
 

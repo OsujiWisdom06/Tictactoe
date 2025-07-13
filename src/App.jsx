@@ -262,9 +262,19 @@ function App() {
       </div>
 
       <div className="scoreboard">
-        <p>Score</p>
-        <p>X: {scores.X} | O: {scores.O}</p>
-      </div>
+  <h2>🏆 Scoreboard</h2>
+  <div className="score-items">
+    <div className="score-box x-score">
+      <span>❌ X</span>
+      <strong>{scores.X}</strong>
+    </div>
+    <div className="score-box o-score">
+      <span>⭕ O</span>
+      <strong>{scores.O}</strong>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 }
