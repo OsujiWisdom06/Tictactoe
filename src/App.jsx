@@ -197,32 +197,37 @@ function App() {
 
       <InstallPrompt />
       <ThemeMode darkMode={darkMode} setDarkMode={setDarkMode} />
-      <h1>TicTac War</h1>
+     <h1 className="game-title">TicTac War</h1>
 
-      <div className="round-info">
-        🏁 Round {round} | 🎮 Games this round: {roundsThisSession}
-      </div>
+<div className="round-ui">
+  <div className="round-box">
+    🏁 <strong>Round:</strong> {round}
+  </div>
+  <div className="round-box secondary">
+    🎮 <strong>Games this round:</strong> {roundsThisSession}
+  </div>
+</div>
 
-      <div className={`mode-selector ${darkMode ? "dark" : ""}`}>
-        <label>
-          Mode:
-          <select value={mode} onChange={(e) => setMode(e.target.value)}>
-            <option value="PvP">👥 Player vs Player</option>
-            <option value="PvC">🤖 Player vs Computer</option>
-          </select>
-        </label>
-        {mode === "PvC" && (
-          <label style={{ marginLeft: "15px" }}>
-            Difficulty:
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-              <option value="easy">😊 Easy</option>
-              <option value="medium">😐 Medium</option>
-              <option value="hard">😈 Hard</option>
-              <option value="boss">👑 Boss Level (AI)</option>
-            </select>
-          </label>
-        )}
-      </div>
+<div className={`mode-container ${darkMode ? "dark" : ""}`}>
+  <div className="mode-group">
+    <label>🎮 Mode:</label>
+    <select value={mode} onChange={(e) => setMode(e.target.value)}>
+      <option value="PvP">👥 Player vs Player</option>
+      <option value="PvC">🤖 Player vs Computer</option>
+    </select>
+  </div>
+  {mode === "PvC" && (
+    <div className="mode-group">
+      <label>🧠 Difficulty:</label>
+      <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+        <option value="easy">😊 Easy</option>
+        <option value="medium">😐 Medium</option>
+        <option value="hard">😈 Hard</option>
+        <option value="boss">👑 Boss Level (AI)</option>
+      </select>
+    </div>
+  )}
+</div>
 
       <div className="status">{status}</div>
 
