@@ -36,6 +36,8 @@ function App() {
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
+  const [round, setRound] = useState(1); // ✅ Round count
+  const [roundsThisSession, setRoundsThisSession] = useState(1); // ✅ Per 5min session
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -127,7 +129,7 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Handle win/draw countdown (only resets game)
+  // Handle win/draw countdown
   useEffect(() => {
     if ((winner || isDraw) && countdown === null && !showNextRoundMsg && !timeUp) {
       if (winner) {
@@ -146,7 +148,7 @@ function App() {
     }
   }, [winner, isDraw, timeUp]);
 
-  // Handle timeUp message and 3-second countdown
+  // Handle timeUp message and countdown
   useEffect(() => {
     if (timeUp) {
       setShowNextRoundMsg(true);
@@ -158,7 +160,7 @@ function App() {
     }
   }, [timeUp]);
 
-  // Final countdown before resetting game or everything
+  // Final countdown before reset
   useEffect(() => {
     if (countdown === null) return;
 
@@ -167,16 +169,20 @@ function App() {
         setCountdown(null);
 
         if (timeUp) {
-          // Full reset after time's up
+          // Full reset
           setGameTimeLeft(300);
           setTimeUp(false);
           setTimerActive(true);
           localStorage.removeItem(TIMER_KEY);
           localStorage.removeItem(TIMESTAMP_KEY);
-          resetScores(); // Optional: reset score on timeout
+          resetScores();
+          setRoundsThisSession(1); // Reset session round count
+        } else {
+          setRoundsThisSession((prev) => prev + 1); // Increment session round count
         }
 
-        resetGame(); // Always reset game board
+        setRound((prev) => prev + 1); // Increment total round count
+        resetGame();
       }, 1000);
       return () => clearTimeout(timeout);
     }
@@ -218,6 +224,9 @@ function App() {
           </label>
         )}
       </div>
+
+      <div className="round-label">🏁 Round {round}</div>
+      <div className="session-tracker">🕒 Rounds this session: {roundsThisSession}</div>
 
       <div className="status">{status}</div>
 
