@@ -36,7 +36,6 @@ function App() {
   const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   const status = winner
     ? `🎉 Winner: ${winner}`
@@ -46,7 +45,31 @@ function App() {
 
   const getOverlayMessage = () => {
     if (showNextRoundMsg) {
-      return `⏰ Time's up!\nNext round starting...`;
+      if (timeUp) return `⏰ Time's up!\nNext round starting...`;
+      if (mode === "PvP") {
+        return winner
+          ? `🎉 Winner: ${winner}\nNext round starting...`
+          : `🤝 It's a draw!\nNext round starting...`;
+      } else {
+        if (winner === "X") {
+          switch (difficulty) {
+            case "easy":
+              return `😊 You beat Easy mode!\nNext round starting...`;
+            case "medium":
+              return `😐 Nice! You won Medium.\nNext round starting...`;
+            case "hard":
+              return `😈 Tough match! You won.\nNext round starting...`;
+            case "boss":
+              return `👑 You defeated the Boss!\nNext round starting...`;
+            default:
+              return `🔥 You win!\nNext round starting...`;
+          }
+        } else if (winner === "O") {
+          return `💀 The AI won!\nNext round starting...`;
+        } else {
+          return `🤝 It's a draw!\nNext round starting...`;
+        }
+      }
     } else {
       return countdown === 0 ? "GO!" : countdown.toString();
     }
@@ -69,15 +92,19 @@ function App() {
     }
   }, []);
 
-  // Timer countdown (respects pause)
+  // Timer countdown
   useEffect(() => {
-    if (!timerActive || timeUp || isPaused) return;
+    if (!timerActive || timeUp) return;
 
     if (gameTimeLeft <= 0) {
       setTimeUp(true);
       setTimerActive(false);
       setShowNextRoundMsg(true);
-      setCountdown(3);
+      const msgTimeout = setTimeout(() => {
+        setShowNextRoundMsg(false);
+        setCountdown(3);
+      }, 1500);
+      return () => clearTimeout(msgTimeout);
     }
 
     const interval = setInterval(() => {
@@ -90,56 +117,61 @@ function App() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, gameTimeLeft, timeUp, isPaused]);
+  }, [timerActive, gameTimeLeft, timeUp]);
 
-  // Pause/resume on visibility
+  // Pause/resume based on tab visibility
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
         setTimerActive(false);
-      } else if (!timeUp && gameTimeLeft > 0 && !isPaused) {
+      } else if (!timeUp && gameTimeLeft > 0) {
         setTimerActive(true);
         localStorage.setItem(TIMESTAMP_KEY, Date.now().toString());
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [timeUp, gameTimeLeft, isPaused]);
+  }, [timeUp, gameTimeLeft]);
 
-  // Confetti on win (optional)
+  // Win/draw logic
   useEffect(() => {
-    if (winner && (mode === "PvP" || (mode === "PvC" && winner === "X"))) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
+    if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
+      if (winner) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      }
+      setShowNextRoundMsg(true);
+      const msgTimeout = setTimeout(() => {
+        setShowNextRoundMsg(false);
+        setCountdown(3);
+      }, 1500);
+      return () => clearTimeout(msgTimeout);
     }
-  }, [winner]);
+  }, [winner, isDraw]);
 
-  // Countdown after time up
+  // Countdown after result or time up
   useEffect(() => {
     if (countdown === null) return;
 
     if (countdown === 0) {
       const timeout = setTimeout(() => {
         resetGame();
-        resetScores();
         setCountdown(null);
-        setShowNextRoundMsg(false);
         setTimeUp(false);
         setTimerActive(true);
         setGameTimeLeft(300);
         localStorage.removeItem(TIMER_KEY);
         localStorage.removeItem(TIMESTAMP_KEY);
-      }, 2000);
+      }, 1000);
       return () => clearTimeout(timeout);
     }
 
     const interval = setInterval(() => {
       setCountdown((prev) => prev - 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [countdown]);
 
@@ -179,11 +211,7 @@ function App() {
 
       {(showNextRoundMsg || countdown !== null) && (
         <div className="countdown-overlay">
-          <div
-            className={`countdown-number ${
-              countdown !== null ? "zoomFade" : "fade-slow"
-            }`}
-          >
+          <div className={`countdown-number ${showNextRoundMsg ? "fade-slow" : "zoomFade"}`}>
             {getOverlayMessage().split("\n").map((line, i) => (
               <div key={i}>{line}</div>
             ))}
@@ -191,16 +219,10 @@ function App() {
         </div>
       )}
 
-      {isPaused && !timeUp && (
-        <div className="pause-overlay">
-          <div className="pause-text">⏸ Paused</div>
-        </div>
-      )}
-
       <Board
         squares={current}
         onClick={(i) =>
-          countdown === null && !showNextRoundMsg && !timeUp && !isPaused && handlePlay(i)
+          countdown === null && !showNextRoundMsg && !timeUp && handlePlay(i)
         }
         winningLine={winningLine}
       />
@@ -211,15 +233,11 @@ function App() {
         </button>
         <button
           onClick={resetScores}
-          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp}
+          disabled={
+            (scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp
+          }
         >
           Reset Score
-        </button>
-        <button
-          onClick={() => setIsPaused((prev) => !prev)}
-          disabled={countdown !== null || showNextRoundMsg || timeUp}
-        >
-          {isPaused ? "▶️ Resume Timer" : "⏸ Pause Timer"}
         </button>
       </div>
 
