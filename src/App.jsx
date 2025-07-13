@@ -9,6 +9,8 @@ import confetti from "canvas-confetti";
 const TIMER_KEY = "tic_tac_timer";
 const TIMESTAMP_KEY = "tic_tac_timestamp";
 
+// ...imports remain unchanged
+
 function App() {
   const {
     history,
@@ -33,7 +35,7 @@ function App() {
 
   const [countdown, setCountdown] = useState(null);
   const [showNextRoundMsg, setShowNextRoundMsg] = useState(false);
-  const [gameTimeLeft, setGameTimeLeft] = useState(300); // 5 minutes
+  const [gameTimeLeft, setGameTimeLeft] = useState(300);
   const [timerActive, setTimerActive] = useState(false);
   const [timeUp, setTimeUp] = useState(false);
 
@@ -119,7 +121,7 @@ function App() {
     return () => clearInterval(interval);
   }, [timerActive, gameTimeLeft, timeUp]);
 
-  // Pause/resume based on tab visibility
+  // Pause/resume on tab switch
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
@@ -133,7 +135,7 @@ function App() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [timeUp, gameTimeLeft]);
 
-  // Win/draw logic
+  // Confetti and result detection
   useEffect(() => {
     if ((winner || isDraw) && countdown === null && !showNextRoundMsg) {
       if (winner) {
@@ -152,7 +154,7 @@ function App() {
     }
   }, [winner, isDraw]);
 
-  // Countdown after result or time up
+  // Countdown logic
   useEffect(() => {
     if (countdown === null) return;
 
@@ -160,11 +162,16 @@ function App() {
       const timeout = setTimeout(() => {
         resetGame();
         setCountdown(null);
+
+        // ✅ Reset timer only if time was up
+        if (timeUp) {
+          setGameTimeLeft(300);
+          localStorage.removeItem(TIMER_KEY);
+          localStorage.removeItem(TIMESTAMP_KEY);
+        }
+
         setTimeUp(false);
         setTimerActive(true);
-        setGameTimeLeft(300);
-        localStorage.removeItem(TIMER_KEY);
-        localStorage.removeItem(TIMESTAMP_KEY);
       }, 1000);
       return () => clearTimeout(timeout);
     }
@@ -233,9 +240,7 @@ function App() {
         </button>
         <button
           onClick={resetScores}
-          disabled={
-            (scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp
-          }
+          disabled={(scores.X === 0 && scores.O === 0) || countdown !== null || showNextRoundMsg || timeUp}
         >
           Reset Score
         </button>
