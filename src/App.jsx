@@ -197,7 +197,7 @@ function App() {
 
       <InstallPrompt />
       <ThemeMode darkMode={darkMode} setDarkMode={setDarkMode} />
-     <h2 className="game-title">TicTac War</h2>
+     <h1 className="game-title">TicTac War</h1>
 
 <div className="round-ui">
   <div className="round-box">

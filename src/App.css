@@ -24,6 +24,7 @@ body.dark {
   background-color: #ffffff;
   padding: 30px 40px;
   border-radius: 12px;
+  height: 100vh;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
   /* width: 350px; */
